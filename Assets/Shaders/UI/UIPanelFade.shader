@@ -53,7 +53,7 @@
             half _OffsetY;
             half _Width;
 
-            Varyings vert (Attributes input)
+            Varyings vert(Attributes input)
             {
                 Varyings output;
                 VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
@@ -65,18 +65,20 @@
                 return output;
             }
 
-            real4 frag (Varyings input) : SV_Target
+            real4 frag(Varyings input) : SV_Target
             {
                 // sample the texture
-                real4 color = input.color;;
+                real4 color = input.color;
 
                 // Halftone
-                float2 centerScreenPos = float2((input.screenPos.x / input.screenPos.w * 2 - 1) * _ScreenParams.x / _ScreenParams.y, input.screenPos.y / input.screenPos.w * 2 - 1);
+                float2 centerScreenPos = float2(
+                    (input.screenPos.x / input.screenPos.w * 2 - 1) * _ScreenParams.x / _ScreenParams.y,
+                    input.screenPos.y / input.screenPos.w * 2 - 1);
                 float halftone = distance(frac((centerScreenPos + half2(-_Time.x, 0)) * 10), 0.5);
                 halftone = Remap(halftone, float2(0.5, 1), float2(1, 0));
 
                 // Gradient
-                half rotate = _Rotation * 3.1425;
+                half rotate = _Rotation * 3.14159;
                 half2 gradientCoords = input.uv; // ((input.screenPos.xy / input.screenPos.w) * 2 - 1;
                 half gradient = dot(gradientCoords + half2(_OffsetX, _OffsetY), half2(sin(rotate), cos(rotate)));
                 gradient = Remap(gradient, float2(-_Width, _Width), float2(0, 1));

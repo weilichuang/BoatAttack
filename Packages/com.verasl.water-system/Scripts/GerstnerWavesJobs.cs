@@ -9,9 +9,9 @@ using WaterSystem.Data;
 
 namespace WaterSystem
 {
-	/// <summary>
-	/// C# Jobs system version of the Gerstner waves implimentation
-	/// </summary>
+    /// <summary>
+    /// C# Jobs system version of the Gerstner waves implimentation
+    /// </summary>
     public static class GerstnerWavesJobs
     {
         //General variables
@@ -31,8 +31,7 @@ namespace WaterSystem
 
         public static void Init()
         {
-            if(UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-                Debug.Log("Initializing Gerstner Waves Jobs");
+            Debug.Log("Initializing Gerstner Waves Jobs");
             //Wave data
             _waveCount = Water.Instance._waves.Length;
             _waveData = new NativeArray<Wave>(_waveCount, Allocator.Persistent);
@@ -50,8 +49,7 @@ namespace WaterSystem
 
         public static void Cleanup()
         {
-            if(UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-                Debug.Log("Cleaning up Gerstner Wave Jobs");
+            Debug.Log("Cleaning up Gerstner Wave Jobs");
             _waterHeightHandle.Complete();
 
             //Cleanup native arrays
@@ -72,7 +70,7 @@ namespace WaterSystem
             else
             {
                 if (_positionCount + samplePoints.Length >= _positions.Length) return;
-                
+
                 offsets = new int2(_positionCount, _positionCount + samplePoints.Length);
                 Registry.Add(guid, offsets);
                 _positionCount += samplePoints.Length;
@@ -82,9 +80,9 @@ namespace WaterSystem
         public static void GetData(int guid, ref float3[] outPos, ref float3[] outNorm)
         {
             if (!Registry.TryGetValue(guid, out var offsets)) return;
-            
+
             _wavePos.Slice(offsets.x, offsets.y - offsets.x).CopyTo(outPos);
-            if(outNorm != null)
+            if (outNorm != null)
                 _waveNormal.Slice(offsets.x, offsets.y - offsets.x).CopyTo(outNorm);
         }
 
@@ -92,7 +90,7 @@ namespace WaterSystem
         public static void UpdateHeights()
         {
             if (_processing) return;
-            
+
             _processing = true;
 
             // Buoyant Object Job
@@ -105,9 +103,9 @@ namespace WaterSystem
                 OutPosition = _wavePos,
                 OutNormal = _waveNormal
             };
-                
+
             _waterHeightHandle = waterHeight.Schedule(_positionCount, 32);
-                
+
             JobHandle.ScheduleBatchedJobs();
 
             _firstFrame = false;
@@ -116,7 +114,7 @@ namespace WaterSystem
         private static void CompleteJobs()
         {
             if (_firstFrame || !_processing) return;
-            
+
             _waterHeightHandle.Complete();
             _processing = false;
         }
@@ -127,24 +125,20 @@ namespace WaterSystem
         {
             [ReadOnly]
             public NativeArray<Wave> WaveData; // wave data stroed in vec4's like the shader version but packed into one
-            [ReadOnly]
-            public NativeArray<float3> Position;
 
-            [WriteOnly]
-            public NativeArray<float3> OutPosition;
-            [WriteOnly]
-            public NativeArray<float3> OutNormal;
+            [ReadOnly] public NativeArray<float3> Position;
 
-            [ReadOnly]
-            public float Time;
-            [ReadOnly]
-            public int2 OffsetLength;
+            [WriteOnly] public NativeArray<float3> OutPosition;
+            [WriteOnly] public NativeArray<float3> OutNormal;
+
+            [ReadOnly] public float Time;
+            [ReadOnly] public int2 OffsetLength;
 
             // The code actually running on the job
             public void Execute(int i)
             {
                 if (i < OffsetLength.x || i >= OffsetLength.y - OffsetLength.x) return;
-                
+
                 var waveCountMulti = 1f / WaveData.Length;
                 var wavePos = new float3(0f, 0f, 0f);
                 var waveNorm = new float3(0f, 0f, 0f);
@@ -167,7 +161,9 @@ namespace WaterSystem
                     var windDir = new float2(0f, 0f);
 
                     direction = math.radians(direction); // convert the incoming degrees to radians
-                    var windDirInput = new float2(math.sin(direction), math.cos(direction)) * (1 - WaveData[wave].onmiDir); // calculate wind direction - TODO - currently radians
+                    var windDirInput = new float2(math.sin(direction), math.cos(direction)) *
+                                       (1 - WaveData[wave]
+                                           .onmiDir); // calculate wind direction - TODO - currently radians
                     var windOmniInput = (pos - omniPos) * WaveData[wave].onmiDir;
 
                     windDir += windDirInput;
@@ -192,6 +188,7 @@ namespace WaterSystem
                         1 - (qi * wa * sinCalc));
                     waveNorm += (norm * waveCountMulti) * amplitude;
                 }
+
                 OutPosition[i] = wavePos;
                 OutNormal[i] = math.normalize(waveNorm.xzy);
             }

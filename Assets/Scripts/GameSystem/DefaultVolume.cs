@@ -6,6 +6,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 #if UNITY_EDITOR
 using UnityEditor;
+
 #endif
 
 [ExecuteAlways]
@@ -40,8 +41,7 @@ public class DefaultVolume : MonoBehaviour
 
         if (Instance != null && Instance != this)
         {
-            if (UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-                Debug.Log($"Extra Volume Manager cleaned up. GUID:{gameObject.GetInstanceID()}");
+            Debug.Log($"Extra Volume Manager cleaned up. GUID:{gameObject.GetInstanceID()}");
             StopAllCoroutines();
             Utility.SafeDestroy(gameObject);
         }
@@ -49,8 +49,8 @@ public class DefaultVolume : MonoBehaviour
         {
             Instance = this;
             gameObject.name = "[DefaultVolume]";
-            if (UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-                Debug.Log($"Default Volume is {gameObject.GetInstanceID()}");
+
+            Debug.Log($"Default Volume is {gameObject.GetInstanceID()}");
             Utility.QualityLevelChange += UpdateVolume;
             UpdateVolume(0, Utility.GetTrueQualityLevel()); // First time set
         }
@@ -79,18 +79,22 @@ public class DefaultVolume : MonoBehaviour
 
     private IEnumerator LoadAndApplyQualityVolume(int index)
     {
-        while (_loading) { yield return null; }
+        while (_loading)
+        {
+            yield return null;
+        }
+
         _loading = true;
         var vol = qualityVolumes[index];
         if (!vol.OperationHandle.IsValid() || !vol.OperationHandle.IsDone)
         {
             qualityVolumes[index].LoadAssetAsync<VolumeProfile>();
         }
+
         yield return vol.OperationHandle;
         volQualityComponent.sharedProfile = vol.OperationHandle.Result as VolumeProfile;
         _loading = false;
 
-        if (UniversalRenderPipeline.asset.debugLevel == PipelineDebugLevel.Disabled) yield break;
         Debug.Log(message: "Updated volumes:\n" +
                            $"    Base Volume : {(volBaseComponent.sharedProfile ? volBaseComponent.sharedProfile.name : "none")}\n" +
                            $"    Quality Volume : {(volQualityComponent.sharedProfile ? volQualityComponent.sharedProfile.name : "none")}\n" +

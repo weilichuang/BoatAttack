@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
+
 #endif
 // ReSharper disable InconsistentNaming
 
@@ -41,29 +42,24 @@ namespace BoatAttack
         public static AppSettings Instance;
         private GameObject loadingScreenObject;
         public static Camera MainCamera;
-        [Header("Resolution Settings")]
-        public RenderRes maxRenderSize = RenderRes._720p;
+        [Header("Resolution Settings")] public RenderRes maxRenderSize = RenderRes._720p;
         public bool variableResolution;
-        [Range(0f, 1f)]
-        public float axisBias = 0.5f;
+        [Range(0f, 1f)] public float axisBias = 0.5f;
         public float minScale = 0.5f;
         public Framerate targetFramerate = Framerate._30;
         private float currentDynamicScale = 1.0f;
         private float maxScale = 1.0f;
         public SpeedFormat speedFormat = SpeedFormat._Mph;
 
-        [Header("Asset References")]
-        public AssetReference loadingScreen;
+        [Header("Asset References")] public AssetReference loadingScreen;
         public AssetReference volumeManager;
-        [Header("Prefabs")]
-        public GameObject consoleCanvas;
+        [Header("Prefabs")] public GameObject consoleCanvas;
         public static GameObject ConsoleCanvas;
 
         // Use this for initialization
         private void Awake()
         {
-            if(UniversalRenderPipeline.asset.debugLevel == PipelineDebugLevel.Profiling)
-                Debug.Log("AppManager initializing");
+            Debug.Log("AppManager initializing");
             Initialize();
             CmdArgs();
             SetRenderScale();
@@ -106,7 +102,7 @@ namespace BoatAttack
 
         private void CleanupLoadingScreen()
         {
-            if(loadingScreenObject) loadingScreen?.ReleaseInstance(loadingScreenObject);
+            if (loadingScreenObject) loadingScreen?.ReleaseInstance(loadingScreenObject);
         }
 
         private void SetRenderScale()
@@ -120,9 +116,7 @@ namespace BoatAttack
             };
             var renderScale = Mathf.Clamp(res / Screen.width, 0.1f, 1.0f);
 
-            if(UniversalRenderPipeline.asset.debugLevel == PipelineDebugLevel.Profiling)
-                Debug.Log($"Settings render scale to {renderScale * 100}% based on {maxRenderSize.ToString()}");
-
+            Debug.Log($"Settings render scale to {renderScale * 100}% based on {maxRenderSize.ToString()}");
             maxScale = renderScale;
 #if !UNITY_EDITOR
             UniversalRenderPipeline.asset.renderScale = renderScale;
@@ -201,7 +195,7 @@ namespace BoatAttack
             DontDestroyOnLoad(Instance.loadingScreenObject);
 
             var buildIndex = SceneUtility.GetBuildIndexByScenePath(scenePath);
-            if(Debug.isDebugBuild)
+            if (Debug.isDebugBuild)
                 Debug.Log($"loading scene {scenePath} at build index {buildIndex}");
 
             // get current scene and set a loading scene as active
@@ -219,7 +213,10 @@ namespace BoatAttack
 
             // clean up
             var clean = Resources.UnloadUnusedAssets();
-            while (!clean.isDone) { yield return null; }
+            while (!clean.isDone)
+            {
+                yield return null;
+            }
 
             // load new scene
             var load = new AsyncOperation();
@@ -243,7 +240,8 @@ namespace BoatAttack
             }
         }
 
-        private static IEnumerator LoadPrefab<T>(AssetReference assetRef, AsyncOperationHandle assetLoading, Transform parent = null)
+        private static IEnumerator LoadPrefab<T>(AssetReference assetRef, AsyncOperationHandle assetLoading,
+            Transform parent = null)
         {
             if (typeof(T) == typeof(GameObject))
             {
@@ -253,12 +251,13 @@ namespace BoatAttack
             {
                 assetLoading = assetRef.LoadAssetAsync<T>();
             }
+
             yield return assetLoading;
         }
 
         public static void ExitGame(string s = "null")
         {
-            if(s != "null")
+            if (s != "null")
                 Debug.LogError(s);
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.ExitPlaymode();
@@ -273,7 +272,7 @@ namespace BoatAttack
             if (args.Length <= 0) return;
             foreach (var argRaw in args)
             {
-                if(string.IsNullOrEmpty(argRaw) || argRaw[0] != '-') continue;
+                if (string.IsNullOrEmpty(argRaw) || argRaw[0] != '-') continue;
                 var arg = argRaw.Split(':');
 
                 switch (arg[0])
@@ -347,7 +346,7 @@ namespace BoatAttack
             get
             {
                 GenerateColors();
-                Random.InitState(SeedNow+Random.Range(0,1000));
+                Random.InitState(SeedNow + Random.Range(0, 1000));
                 return ColorPalette[Random.Range(0, ColorPalette.Length)];
             }
         }
@@ -362,6 +361,5 @@ namespace BoatAttack
             ColorPalette = _colorPaletteRaw.GetPixels();
             Debug.Log($"Found {ColorPalette.Length} colors.");
         }
-
     }
 }

@@ -14,7 +14,7 @@ class LodLightmapCopy : IProcessSceneWithReport
     {
         Execute();
     }
-    
+
     static LodLightmapCopy()
     {
         Lightmapping.bakeCompleted += Execute;
@@ -23,14 +23,13 @@ class LodLightmapCopy : IProcessSceneWithReport
 
     static void LodLightmapEdit(PlayModeStateChange state)
     {
-        if(state == PlayModeStateChange.EnteredEditMode) Execute();
+        if (state == PlayModeStateChange.EnteredEditMode) Execute();
     }
-    
+
     private static void Execute()
     {
-        if(UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-            Debug.Log("Baking LOD Lightmap values");
-        var lodGroups= Object.FindObjectsOfType<LODGroup>();
+        Debug.Log("Baking LOD Lightmap values");
+        var lodGroups = Object.FindObjectsOfType<LODGroup>();
         foreach (var lodGroup in lodGroups)
         {
             //is lod0 lightmapped

@@ -15,8 +15,8 @@ namespace BoatAttack
 {
     public class RaceManager : MonoBehaviour
     {
-        
         #region Enums
+
         [Serializable]
         public enum GameType
         {
@@ -51,10 +51,11 @@ namespace BoatAttack
             //Competitors
             public List<BoatData> boats;
         }
-               
+
         #endregion
 
         public static RaceManager Instance;
+
         [NonSerialized] public static bool RaceStarted;
         [NonSerialized] public static Race RaceData;
         public Race demoRaceData = new Race();
@@ -66,7 +67,7 @@ namespace BoatAttack
         [Header("Assets")] public AssetReference[] boats;
         public AssetReference raceUiPrefab;
         public AssetReference raceUiTouchPrefab;
-        
+
         public static void BoatFinished(int player)
         {
             switch (RaceData.game)
@@ -78,6 +79,7 @@ namespace BoatAttack
                         raceUi.MatchEnd();
                         ReplayCamera.Instance.EnableSpectatorMode();
                     }
+
                     break;
                 case GameType.LocalMultiplayer:
                     break;
@@ -91,11 +93,10 @@ namespace BoatAttack
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
         private void Awake()
         {
-            if(UniversalRenderPipeline.asset.debugLevel != PipelineDebugLevel.Disabled)
-                Debug.Log("RaceManager Loaded");
+            Debug.Log("RaceManager Loaded");
             Instance = this;
         }
 
@@ -115,11 +116,15 @@ namespace BoatAttack
 
         public static IEnumerator SetupRace()
         {
-            if(RaceData == null) RaceData = Instance.demoRaceData; // make sure we have the data, otherwise default to demo data
-            while (WaypointGroup.Instance == null) // TODO need to re-write whole game loading/race setup logic as it is dirty
+            if (RaceData == null)
+                RaceData = Instance.demoRaceData; // make sure we have the data, otherwise default to demo data
+            while (
+                WaypointGroup.Instance ==
+                null) // TODO need to re-write whole game loading/race setup logic as it is dirty
             {
                 yield return null;
             }
+
             WaypointGroup.Instance.Setup(RaceData.reversed); // setup waypoints
             yield return Instance.StartCoroutine(CreateBoats()); // spawn boats;
 
@@ -141,13 +146,15 @@ namespace BoatAttack
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-            
+
             Instance.StartCoroutine(BeginRace());
         }
-        
+
         public static void SetGameType(GameType gameType)
         {
-            RaceData = new Race {game = gameType,
+            RaceData = new Race
+            {
+                game = gameType,
                 boats = new List<BoatData>(),
                 boatCount = 4,
                 laps = 3,
@@ -201,14 +208,15 @@ namespace BoatAttack
                 {
                     yield return null;
                 }
+
                 introCams.SetActive(false);
             }
 
             yield return new WaitForSeconds(3f); // countdown 3..2..1..
-            
+
             RaceStarted = true;
             raceStarted?.Invoke(RaceStarted);
-            
+
             SceneManager.sceneLoaded -= Setup;
         }
 
@@ -236,7 +244,7 @@ namespace BoatAttack
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
         private void LateUpdate()
         {
             if (!RaceStarted) return;
@@ -255,12 +263,14 @@ namespace BoatAttack
                     _boatTimes[i] = boat.LapPercentage + boat.LapCount;
                 }
             }
-            if(RaceStarted && finished == 0)
+
+            if (RaceStarted && finished == 0)
                 EndRace();
 
             var mySortedList = _boatTimes.OrderBy(d => d.Value).ToList();
             var place = RaceData.boatCount;
-            foreach (var boat in mySortedList.Select(index => RaceData.boats[index.Key].Boat).Where(boat => !boat.MatchComplete))
+            foreach (var boat in mySortedList.Select(index => RaceData.boats[index.Key].Boat)
+                .Where(boat => !boat.MatchComplete))
             {
                 boat.Place = place;
                 place--;
@@ -268,7 +278,7 @@ namespace BoatAttack
 
             RaceTime += Time.deltaTime;
         }
-        
+
         #region Utilities
 
         public static void LoadGame()
@@ -280,7 +290,7 @@ namespace BoatAttack
         public static void UnloadRace()
         {
             Debug.LogWarning("Unloading Race");
-            if(Instance.raceUiPrefab != null && Instance.raceUiPrefab.IsValid())
+            if (Instance.raceUiPrefab != null && Instance.raceUiPrefab.IsValid())
             {
                 Instance.raceUiPrefab.ReleaseAsset();
             }
@@ -288,9 +298,9 @@ namespace BoatAttack
             Instance.Reset();
             AppSettings.LoadScene(0, LoadSceneMode.Single);
         }
-        
+
         public static void SetHull(int player, int hull) => RaceData.boats[player].boatPrefab = Instance.boats[hull];
-        
+
         private static IEnumerator CreateBoats()
         {
             for (int i = 0; i < RaceData.boats.Count; i++)
@@ -299,7 +309,8 @@ namespace BoatAttack
 
                 // Load prefab
                 var startingPosition = WaypointGroup.Instance.StartingPositions[i];
-                AsyncOperationHandle<GameObject> boatLoading = Addressables.InstantiateAsync(boat.boatPrefab, startingPosition.GetColumn(3),
+                AsyncOperationHandle<GameObject> boatLoading = Addressables.InstantiateAsync(boat.boatPrefab,
+                    startingPosition.GetColumn(3),
                     Quaternion.LookRotation(startingPosition.GetColumn(2)));
 
                 yield return boatLoading; // wait for boat asset to load
@@ -310,15 +321,14 @@ namespace BoatAttack
                 boatController.Setup(i + 1, boat.human, boat.livery);
                 Instance._boatTimes.Add(i, 0f);
             }
-
         }
-        
+
         private static void GenerateRandomBoats(int count, bool ai = true)
         {
             for (var i = 0; i < count; i++)
             {
                 var boat = new BoatData();
-                Random.InitState(ConstantData.SeedNow+i);
+                Random.InitState(ConstantData.SeedNow + i);
                 boat.boatName = ConstantData.AiNames[Random.Range(0, ConstantData.AiNames.Length)];
                 BoatLivery livery = new BoatLivery
                 {
@@ -354,21 +364,26 @@ namespace BoatAttack
         private static void SetupCamera(int player, bool remove = false)
         {
             // Setup race camera
-            if(remove)
-                AppSettings.MainCamera.cullingMask &= ~(1 << LayerMask.NameToLayer($"Player{player + 1}")); // TODO - this needs more work for when adding splitscreen.
+            if (remove)
+                AppSettings.MainCamera.cullingMask &=
+                    ~(1 << LayerMask.NameToLayer(
+                        $"Player{player + 1}")); // TODO - this needs more work for when adding splitscreen.
             else
-                AppSettings.MainCamera.cullingMask |= 1 << LayerMask.NameToLayer($"Player{player + 1}"); // TODO - this needs more work for when adding splitscreen.
+                AppSettings.MainCamera.cullingMask |=
+                    1 << LayerMask.NameToLayer(
+                        $"Player{player + 1}"); // TODO - this needs more work for when adding splitscreen.
         }
-        
+
         public static int GetLapCount()
         {
             if (RaceData != null && RaceData.type == RaceType.Race)
             {
                 return RaceData.laps;
             }
+
             return -1;
         }
-        
+
         #endregion
     }
 }

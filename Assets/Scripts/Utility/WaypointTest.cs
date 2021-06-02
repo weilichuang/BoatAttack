@@ -29,6 +29,7 @@ public class WaypointTest : MonoBehaviour
         segmentPercentage = (loop ? 1f : wps.Item2.normalizedDistance) - wps.Item1.normalizedDistance;
         var segmentDistance = wpGroup.length * segmentPercentage;
         var positionSegmentPercentage = Vector3.Distance(closestPoint, wps.Item1.point) / segmentDistance;
-        trackPercentage = Mathf.Lerp(wps.Item1.normalizedDistance, (loop ? 1f : wps.Item2.normalizedDistance), positionSegmentPercentage);
+        trackPercentage = Mathf.Lerp(wps.Item1.normalizedDistance, (loop ? 1f : wps.Item2.normalizedDistance),
+            positionSegmentPercentage);
     }
 }
