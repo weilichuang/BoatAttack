@@ -23,8 +23,7 @@ namespace BoatAttack.UI
         public GameObject raceStat;
         public GameObject matchEnd;
 
-        [Header("Assets")]
-        public AssetReference playerMarker;
+        [Header("Assets")] public AssetReference playerMarker;
         public AssetReference playerMapMarker;
         public AssetReference raceStatsPlayer;
 
@@ -81,6 +80,7 @@ namespace BoatAttack.UI
                     stat.UpdateStats();
                 }
             }
+
             gameplayUi.SetActive(enable);
         }
 
@@ -99,7 +99,7 @@ namespace BoatAttack.UI
         private IEnumerator CreateGameStats()
         {
             _raceStats = new RaceStatsPlayer[RaceManager.RaceData.boatCount];
-            for(var i = 0; i < RaceManager.RaceData.boatCount; i++)
+            for (var i = 0; i < RaceManager.RaceData.boatCount; i++)
             {
                 var raceStatLoading = raceStatsPlayer.InstantiateAsync(raceStat.transform);
                 yield return raceStatLoading;
@@ -207,6 +207,7 @@ namespace BoatAttack.UI
                 var lap = splits[i] - splits[i - 1];
                 fastestLap = lap < fastestLap ? lap : fastestLap;
             }
+
             return fastestLap;
         }
     }
