@@ -10,7 +10,8 @@ using WaterSystem.Data;
 namespace WaterSystem
 {
     /// <summary>
-    /// C# Jobs system version of the Gerstner waves implimentation
+    /// C# Jobs system version of the Gerstner waves implementation
+    /// C# Jobs system 计算Gerstner波
     /// </summary>
     public static class GerstnerWavesJobs
     {
@@ -124,7 +125,7 @@ namespace WaterSystem
         private struct HeightJob : IJobParallelFor
         {
             [ReadOnly]
-            public NativeArray<Wave> WaveData; // wave data stroed in vec4's like the shader version but packed into one
+            public NativeArray<Wave> WaveData; // wave data stored in vec4's like the shader version but packed into one
 
             [ReadOnly] public NativeArray<float3> Position;
 

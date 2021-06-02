@@ -8,7 +8,6 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using BoatAttack.UI;
 using UnityEngine.Playables;
-using UnityEngine.Rendering.Universal;
 using Random = UnityEngine.Random;
 
 namespace BoatAttack
@@ -118,9 +117,9 @@ namespace BoatAttack
         {
             if (RaceData == null)
                 RaceData = Instance.demoRaceData; // make sure we have the data, otherwise default to demo data
-            while (
-                WaypointGroup.Instance ==
-                null) // TODO need to re-write whole game loading/race setup logic as it is dirty
+
+            // TODO need to re-write whole game loading/race setup logic as it is dirty
+            while (WaypointGroup.Instance == null)
             {
                 yield return null;
             }
@@ -301,9 +300,13 @@ namespace BoatAttack
 
         public static void SetHull(int player, int hull) => RaceData.boats[player].boatPrefab = Instance.boats[hull];
 
+        /// <summary>
+        /// 创建船只
+        /// </summary>
+        /// <returns></returns>
         private static IEnumerator CreateBoats()
         {
-            for (int i = 0; i < RaceData.boats.Count; i++)
+            for (var i = 0; i < RaceData.boats.Count; i++)
             {
                 var boat = RaceData.boats[i]; // boat to setup
 
@@ -363,15 +366,17 @@ namespace BoatAttack
 
         private static void SetupCamera(int player, bool remove = false)
         {
+            // TODO - this needs more work for when adding splitscreen.
+            var layerMask = 1 << LayerMask.NameToLayer($"Player{player + 1}");
             // Setup race camera
             if (remove)
-                AppSettings.MainCamera.cullingMask &=
-                    ~(1 << LayerMask.NameToLayer(
-                        $"Player{player + 1}")); // TODO - this needs more work for when adding splitscreen.
+            {
+                AppSettings.MainCamera.cullingMask &= ~(layerMask);
+            }
             else
-                AppSettings.MainCamera.cullingMask |=
-                    1 << LayerMask.NameToLayer(
-                        $"Player{player + 1}"); // TODO - this needs more work for when adding splitscreen.
+            {
+                AppSettings.MainCamera.cullingMask |= layerMask;
+            }
         }
 
         public static int GetLapCount()

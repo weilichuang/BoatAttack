@@ -7,6 +7,7 @@ namespace BoatAttack
 {
     /// <summary>
     /// This controls the logic for the wind surfer
+    /// 低端机考虑可关闭
     /// </summary>
     public class WindsurferManager : MonoBehaviour
     {
@@ -30,6 +31,7 @@ namespace BoatAttack
             {
                 _smoothPositions[i] = surfers[i].position;
             }
+
             _points = new NativeArray<float3>(surfers.Length, Allocator.Persistent);
         }
 
